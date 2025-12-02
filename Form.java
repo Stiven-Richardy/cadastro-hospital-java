@@ -138,6 +138,7 @@ public class Form extends JFrame {
 
         btnPesquisar.addActionListener(e -> pesquisarPessoa());
         btnCadastrar.addActionListener(e -> cadastrarPessoa());
+        btnExibir.addActionListener(e -> exibirDados());
         btnLimpar.addActionListener(e -> limparTela());
         btnSair.addActionListener(e -> System.exit(0));
 
@@ -236,6 +237,46 @@ public class Form extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Erro SQL: " + ex.getMessage(),
+                    "Erro",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void exibirDados() {
+        String sql = "SELECT * FROM pessoas";
+        StringBuilder dados = new StringBuilder();
+
+        try (Connection conn = DriverManager.getConnection(URL, USUARIO, SENHA);
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String nome = rs.getString("nome");
+                int idade = rs.getInt("idade");
+                float peso = rs.getFloat("peso");
+                float altura = rs.getFloat("altura");
+
+                dados.append("ID: ").append(id)
+                        .append(", Nome: ").append(nome)
+                        .append(", Idade: ").append(idade)
+                        .append(", Peso: ").append(peso)
+                        .append(", Altura: ").append(altura)
+                        .append("\n");
+            }
+
+            if (dados.length() == 0) {
+                dados.append("Nenhum registro encontrado.");
+            }
+
+            JOptionPane.showMessageDialog(this,
+                    dados.toString(),
+                    "Dados das Pessoas",
+                    JOptionPane.INFORMATION_MESSAGE);
+
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this,
                     "Erro SQL: " + ex.getMessage(),
