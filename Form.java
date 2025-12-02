@@ -79,9 +79,20 @@ public class Form extends JFrame {
         painelPrincipal.add(separatorInferior);
         painelPrincipal.add(painelInferior);
 
+        btnLimpar.addActionListener(e -> limparTela());
+        btnSair.addActionListener(e -> System.exit(0));
+
         add(painelPrincipal, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(null);
+    }
+
+    public void limparTela() {
+        txtNomePesquisado.setText("");
+        txtNome.setText("");
+        txtIdade.setText("");
+        txtPeso.setText("");
+        txtAltura.setText("");
     }
 
     public static void main(String[] args) {
