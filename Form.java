@@ -16,6 +16,10 @@ public class Form extends JFrame {
     private static final String USUARIO = "user_java";
     private static final String SENHA = "Senha2025@";
 
+    private Connection conn;
+    private PreparedStatement ps;
+    private ResultSet rs;
+
     private JPanel painelPrincipal;
     private JPanel painelSuperior;
     private JPanel painelCentral;
@@ -79,6 +83,7 @@ public class Form extends JFrame {
         painelPrincipal.add(separatorInferior);
         painelPrincipal.add(painelInferior);
 
+        btnPesquisar.addActionListener(e -> pesquisarPessoa());
         btnLimpar.addActionListener(e -> limparTela());
         btnSair.addActionListener(e -> System.exit(0));
 
@@ -86,6 +91,57 @@ public class Form extends JFrame {
         pack();
         setLocationRelativeTo(null);
     }
+
+    private void pesquisarPessoa() {
+        String nome = txtNomePesquisado.getText().trim();
+
+        String sql = "SELECT nome, idade, altura, peso "
+                   + "FROM pessoas "
+                   + "WHERE nome LIKE ?";
+
+        try {
+            conn = DriverManager.getConnection(URL, USUARIO, SENHA);
+            ps = conn.prepareStatement(sql,
+                    ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY);
+            if (nome.isEmpty())
+                ps.setString(1, "%");
+            else
+                ps.setString(1, nome + "%");
+            
+            rs = ps.executeQuery();
+
+            if (rs.next())
+                atualizarCampos();
+            else {
+                JOptionPane.showMessageDialog(this,
+                    "Nenhum registro encontrado.",
+                    "Aviso",
+                    JOptionPane.INFORMATION_MESSAGE);
+                limparTela();
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Erro SQL: " + ex.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void atualizarCampos() {
+        try {
+            txtNome.setText(rs.getString("nome"));
+            txtIdade.setText(String.format("", rs.getDouble("idade")));
+            txtPeso.setText(rs.getString("peso"));
+            txtAltura.setText(rs.getString("altura"));
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                "Erro ao navegar: " + ex.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 
     public void limparTela() {
         txtNomePesquisado.setText("");
